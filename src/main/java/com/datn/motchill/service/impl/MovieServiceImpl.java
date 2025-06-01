@@ -6,10 +6,7 @@ import com.datn.motchill.common.utils.Constants;
 import com.datn.motchill.dto.movie.MovieDto;
 import com.datn.motchill.dto.movie.MovieFilterDTO;
 import com.datn.motchill.dto.movie.MovieRequest;
-import com.datn.motchill.entity.Country;
-import com.datn.motchill.entity.Genre;
-import com.datn.motchill.entity.Movie;
-import com.datn.motchill.entity.Tag;
+import com.datn.motchill.entity.*;
 import com.datn.motchill.enums.MovieStatusEnum;
 import com.datn.motchill.enums.MovieTypeEnum;
 import com.datn.motchill.repository.CountryRepository;
@@ -35,6 +32,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -288,7 +286,7 @@ public class MovieServiceImpl implements MovieService {
                 .collect(Collectors.toList());
     }
 
-    private Specification<Movie> getSearchSpecification(final MovieFilterDTO request) {
+    private Specification<Movie> getSearchSpecification(final MovieFilterDTO filter) {
         return new Specification<>() {
 
             private static final long serialVersionUID = 6345534328548406667L;
@@ -297,21 +295,68 @@ public class MovieServiceImpl implements MovieService {
             @Nullable
             public Predicate toPredicate(Root<Movie> root, CriteriaQuery<?> query,
                                          CriteriaBuilder criteriaBuilder) {
+
                 List<Predicate> predicates = new ArrayList<>();
 
-                if(request.getKeyword() != null) {
-                    String search = "%" + request.getKeyword().toLowerCase() + "%";
-                    Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), search);
-                    Predicate originalNamePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("originalName")), search);
-
-                    predicates.add(criteriaBuilder.or(namePredicate, originalNamePredicate));
+                // Tìm kiếm theo từ khóa (title, description)
+                if (StringUtils.hasText(filter.getSearch())) {
+                    String keyword = "%" + filter.getSearch().toLowerCase() + "%";
+                    Predicate titlePredicate = criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("title")),
+                            keyword);
+                    Predicate descriptionPredicate = criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("description")),
+                            keyword);
+                    predicates.add(criteriaBuilder.or(titlePredicate, descriptionPredicate));
                 }
 
-                if (request.getGenreIds() != null && !request.getGenreIds().isEmpty()) {
+                // Lọc theo năm phát hành
+                if (filter.getReleaseYear() != null) {
+                    predicates.add(criteriaBuilder.equal(root.get("releaseYear"), filter.getReleaseYear()));
+                }
+
+                // Lọc theo nhiều loại phim
+                if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
+                    List<MovieTypeEnum> typeEnums = filter.getTypes().stream()
+                            .map(MovieTypeEnum::fromKey)
+                            .toList();
+                    predicates.add(root.get("movieType").in(typeEnums));
+                }
+
+                // Lọc theo nhiều trạng thái phim
+                if (filter.getStatuses() != null && !filter.getStatuses().isEmpty()) {
+                    List<MovieStatusEnum> statusEnums = filter.getStatuses().stream()
+                            .map(MovieStatusEnum::fromKey)
+                            .toList();
+                    predicates.add(root.get("status").in(statusEnums));
+                }
+
+                // Lọc theo thể loại
+                if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
                     Join<Movie, Genre> genreJoin = root.join("genres", JoinType.INNER);
-                    predicates.add(genreJoin.get("id").in(request.getGenreIds()));
-                    query.distinct(true); // vì join có thể tạo duplicate row
+                    predicates.add(genreJoin.get("id").in(filter.getGenreIds()));
                 }
+
+                // Lọc theo quốc gia
+                if (filter.getCountryIds() != null && !filter.getCountryIds().isEmpty()) {
+                    Join<Movie, Country> countryJoin = root.join("countries", JoinType.INNER);
+                    predicates.add(countryJoin.get("id").in(filter.getCountryIds()));
+                }
+
+                // Lọc theo đạo diễn
+                if (filter.getDirectorIds() != null && !filter.getDirectorIds().isEmpty()) {
+                    Join<Movie, Director> directorJoin = root.join("directors", JoinType.INNER);
+                    predicates.add(directorJoin.get("id").in(filter.getDirectorIds()));
+                }
+
+                // Lọc theo tag
+                if (filter.getTagIds() != null && !filter.getTagIds().isEmpty()) {
+                    Join<Movie, Tag> tagJoin = root.join("tags", JoinType.INNER);
+                    predicates.add(tagJoin.get("id").in(filter.getTagIds()));
+                }
+
+                // Ngăn chặn trùng lặp kết quả khi sử dụng nhiều join
+                query.distinct(true);
 
                 return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
             }

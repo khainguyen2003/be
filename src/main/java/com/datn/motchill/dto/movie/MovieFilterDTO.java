@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,10 +23,9 @@ public class MovieFilterDTO extends AdminPageFilterDTO {
     private String search;
     
     private Integer releaseYear;
-    
-    private MovieTypeEnum type; // Phim lẻ, Phim bộ
-    
-    private MovieStatusEnum status; // Hoàn thành, Đang cập nhật
+
+    private List<Integer> types;
+    private List<Integer> statuses;
     
     private Set<Long> genreIds;
     

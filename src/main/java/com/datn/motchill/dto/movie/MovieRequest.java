@@ -3,6 +3,7 @@ package com.datn.motchill.dto.movie;
 import com.datn.motchill.enums.MovieStatusEnum;
 import com.datn.motchill.enums.MovieTypeEnum;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -31,9 +32,11 @@ public class MovieRequest {
     private String trailerUrl;
     
     @NotNull(message = "Trạng thái phim không được để trống")
+    @Convert(converter = MovieStatusEnum.MovieStatusEnumConverter.class)
     private MovieStatusEnum status; // Hoàn thành, Đang cập nhật
     
     @NotNull(message = "Loại phim không được để trống")
+    @Convert(converter = MovieTypeEnum.MovieTypeEnumConverter.class)
     private MovieTypeEnum type; // Phim lẻ, Phim bộ
     
     @Min(value = 1900, message = "Năm phát hành phải từ 1900 trở lên")

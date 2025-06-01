@@ -6,6 +6,8 @@ import com.datn.motchill.entity.Director;
 import com.datn.motchill.entity.Genre;
 import com.datn.motchill.entity.Movie;
 import com.datn.motchill.entity.Tag;
+import com.datn.motchill.enums.MovieStatusEnum;
+import com.datn.motchill.enums.MovieTypeEnum;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -25,8 +27,8 @@ public class MovieSpecification {
             List<Predicate> predicates = new ArrayList<>();
             
             // Tìm kiếm theo từ khóa (title, description)
-            if (StringUtils.hasText(filter.getKeyword())) {
-                String keyword = "%" + filter.getKeyword().toLowerCase() + "%";
+            if (StringUtils.hasText(filter.getSearch())) {
+                String keyword = "%" + filter.getSearch().toLowerCase() + "%";
                 Predicate titlePredicate = criteriaBuilder.like(
                         criteriaBuilder.lower(root.get("title")), 
                         keyword);
@@ -40,15 +42,21 @@ public class MovieSpecification {
             if (filter.getReleaseYear() != null) {
                 predicates.add(criteriaBuilder.equal(root.get("releaseYear"), filter.getReleaseYear()));
             }
-            
-            // Lọc theo loại phim (phim lẻ, phim bộ)
-            if (filter.getType() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("type"), filter.getType()));
+
+            // Lọc theo nhiều loại phim
+            if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
+                List<MovieTypeEnum> typeEnums = filter.getTypes().stream()
+                        .map(MovieTypeEnum::fromKey)
+                        .toList();
+                predicates.add(root.get("movieType").in(typeEnums));
             }
-            
-            // Lọc theo trạng thái phim (hoàn thành, đang cập nhật)
-            if (filter.getStatus() != null) {
-                predicates.add(criteriaBuilder.equal(root.get("status"), filter.getStatus()));
+
+            // Lọc theo nhiều trạng thái phim
+            if (filter.getStatuses() != null && !filter.getStatuses().isEmpty()) {
+                List<MovieStatusEnum> statusEnums = filter.getStatuses().stream()
+                        .map(MovieStatusEnum::fromKey)
+                        .toList();
+                predicates.add(root.get("status").in(statusEnums));
             }
             
             // Lọc theo thể loại
