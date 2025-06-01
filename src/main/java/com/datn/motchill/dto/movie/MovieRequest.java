@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -57,4 +58,7 @@ public class MovieRequest {
     private Set<Long> countryIds;
     
     private Set<Long> directorIds;
+
+    private MultipartFile thumb;
+    private MultipartFile poster;
 }

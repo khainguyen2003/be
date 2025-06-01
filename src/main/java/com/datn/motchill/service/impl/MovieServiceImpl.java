@@ -16,6 +16,7 @@ import com.datn.motchill.repository.GenreRepository;
 import com.datn.motchill.repository.MovieRepository;
 import com.datn.motchill.repository.TagRepository;
 import com.datn.motchill.repository.ViewStatisticsRepository;
+import com.datn.motchill.service.FileStorageService;
 import com.datn.motchill.service.MovieService;
 import com.datn.motchill.util.SlugUtils;
 
@@ -34,10 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +52,8 @@ public class MovieServiceImpl implements MovieService {
     private final ViewStatisticsRepository viewStatisticsRepository;
     private final DirectorRepository directorRepository;
     private final ModelMapper modelMapper;
+
+    private final FileStorageService fileStorageService;
 
     @PersistenceContext
     private final EntityManager entityManager;
@@ -110,6 +111,15 @@ public class MovieServiceImpl implements MovieService {
         if (movie.getSlug() == null || movie.getSlug().isBlank()) {
             movie.setSlug(SlugUtils.slugify(movie.getName()));
         }
+
+        // Lưu thumb và poster
+        String thumbUrl = null;
+        try {
+            thumbUrl = fileStorageService.saveFile(request.getThumb(), request.getThumb().getOriginalFilename());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        movie.setThumbUrl(thumbUrl);
         
         // Default status if not provided
         movie.setStatus(MovieStatusEnum.SAVE_DRAFT);
