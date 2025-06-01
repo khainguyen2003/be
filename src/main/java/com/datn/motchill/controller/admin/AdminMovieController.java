@@ -33,7 +33,7 @@ public class AdminMovieController {
     /**
      * Create a new movie
      */
-    @PostMapping
+    @PostMapping("/save-draft")
     public ResponseEntity<MovieDto> createMovie(@Valid @RequestBody MovieRequest movieRequest) {
         return new ResponseEntity<>(movieService.saveDraft(movieRequest), HttpStatus.CREATED);
     }
@@ -49,7 +49,7 @@ public class AdminMovieController {
     /**
      * Update a movie
      */
-    @PutMapping("/{id}")
+    @PutMapping("/update-draft/{id}")
     public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @Valid @RequestBody MovieRequest movieRequest) {
         return ResponseEntity.ok(movieService.updateDraft(id, movieRequest));
     }
