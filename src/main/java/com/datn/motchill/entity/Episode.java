@@ -18,9 +18,6 @@ import lombok.Setter;
 public class Episode  extends BaseEntity {
     @Column(name = "NAME", length = 2000, nullable = false)
     private String name;
-    
-    @Column(name = "TITLE", length = 2000)
-    private String title;
 
     @Column(name = "SLUG", length = 100, nullable = false)
     private String slug;
@@ -66,9 +63,6 @@ public class Episode  extends BaseEntity {
     @JoinColumn(name = "movie_id")
     @JsonIgnore
     private Movie movie;
-
-    @Column(name = "THUMBNAIL_PATH", length = 1024)
-    private String thumbnailPath;
 
     private Date createdDate;
     private Date updatedDate;
