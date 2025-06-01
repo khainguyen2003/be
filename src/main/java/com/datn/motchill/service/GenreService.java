@@ -1,56 +1,64 @@
 package com.datn.motchill.service;
 
+import com.datn.motchill.dto.AdminIdsDTO;
 import com.datn.motchill.dto.genre.GenreDto;
 import com.datn.motchill.dto.genre.GenreRequest;
-import com.datn.motchill.entity.Genre;
-import com.datn.motchill.repository.GenreRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.datn.motchill.dto.OptionDTO;
+
+import com.datn.motchill.dto.genre.GenreFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
-public class GenreService {
+public interface GenreService {
+    
+    /**
+     * Tìm tất cả thể loại với phân trang
+     */
+    Page<GenreDto> findAll(Pageable pageable);
 
-    private final GenreRepository genreRepository;
+    Page<GenreDto> search(GenreFilter filter);
+    
+    /**
+     * Lấy danh sách tất cả thể loại
+     */
+    List<GenreDto> findAll();
 
-    public List<GenreDto> getAll() {
-        return genreRepository.findAll().stream()
-                .map(g -> new GenreDto(g.getId(), g.getName(), g.getSlug()))
-                .collect(Collectors.toList());
-    }
-
-    public GenreDto getById(Long id) {
-        Genre genre = genreRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
-        return new GenreDto(genre.getId(), genre.getName(), genre.getSlug());
-    }
-
-    public GenreDto create(GenreRequest request) {
-        Genre genre = new Genre();
-        if(genreRepository.isExist(request.getName(), request.getSlug())) {
-            throw new RuntimeException("Thể loại đã tồn tại");
-        }
-        genre.setName(request.getName());
-        genre.setSlug(request.getSlug());
-        genreRepository.save(genre);
-        return new GenreDto(genre.getId(), genre.getName(), genre.getSlug());
-    }
-
-    public GenreDto update(Long id, GenreRequest request) {
-        Genre genre = genreRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
-        if(genreRepository.isExistAndIdNot(request.getName(), request.getSlug(), id)) {
-            throw new RuntimeException("Thể loại đã tồn tại");
-        }
-        genre.setName(request.getName());
-        genre.setSlug(request.getSlug());
-        genreRepository.save(genre);
-        return new GenreDto(genre.getId(), genre.getName(), genre.getSlug());
-    }
-
-    public void delete(Long id) {
-        genreRepository.deleteById(id);
-    }
+    List<OptionDTO> findAllOptions();
+    
+    /**
+     * Tìm thể loại theo ID
+     */
+    GenreDto findById(Long id);
+    
+    /**
+     * Tìm thể loại theo slug
+     */
+    GenreDto findBySlug(String slug);
+    
+    /**
+     * Tạo thể loại mới
+     */
+    GenreDto create(GenreRequest request);
+    
+    /**
+     * Cập nhật thể loại
+     */
+    GenreDto update(Long id, GenreRequest request);
+    
+    /**
+     * Xóa thể loại
+     */
+    String delete(AdminIdsDTO idsDTO);
+    
+    /**
+     * Kiểm tra tồn tại theo slug
+     */
+    boolean existsBySlug(String slug);
+    
+    /**
+     * Kiểm tra tồn tại theo tên
+     */
+    boolean existsByName(String name);
 }
-

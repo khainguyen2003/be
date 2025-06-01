@@ -1,8 +1,8 @@
 package com.datn.motchill.controller;
 
-import com.datn.motchill.dto.ActorDto;
-import com.datn.motchill.dto.CountryDto;
-import com.datn.motchill.dto.DirectorDto;
+import com.datn.motchill.dto.actor.ActorDto;
+import com.datn.motchill.dto.country.CountryDto;
+import com.datn.motchill.dto.director.DirectorDto;
 import com.datn.motchill.service.CommonService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

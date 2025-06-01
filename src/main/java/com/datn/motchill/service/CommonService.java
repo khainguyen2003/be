@@ -1,8 +1,8 @@
 package com.datn.motchill.service;
 
-import com.datn.motchill.dto.ActorDto;
-import com.datn.motchill.dto.CountryDto;
-import com.datn.motchill.dto.DirectorDto;
+import com.datn.motchill.dto.actor.ActorDto;
+import com.datn.motchill.dto.country.CountryDto;
+import com.datn.motchill.dto.director.DirectorDto;
 import com.datn.motchill.entity.Actor;
 import com.datn.motchill.repository.ActorRepository;
 import com.datn.motchill.repository.CountryRepository;

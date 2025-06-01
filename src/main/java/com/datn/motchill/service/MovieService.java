@@ -1,94 +1,87 @@
 package com.datn.motchill.service;
 
-import com.datn.motchill.admin.common.exceptions.BadRequestException;
-import com.datn.motchill.dto.movie.MovieRequestDto;
-import com.datn.motchill.dto.movie.MovieResponseDto;
+import com.datn.motchill.dto.movie.MovieDto;
+import com.datn.motchill.dto.movie.MovieFilterDTO;
+import com.datn.motchill.dto.movie.MovieRequest;
 import com.datn.motchill.entity.Movie;
-import com.datn.motchill.repository.*;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.datn.motchill.enums.MovieStatusEnum;
+import com.datn.motchill.enums.MovieTypeEnum;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class MovieService {
-    private final MovieRepository movieRepository;
-    private final ActorRepository actorRepository;
-    private final DirectorRepository directorRepository;
-    private final GenreRepository genreRepository;
-    private final CountryRepository countryRepository;
+public interface MovieService {
 
-    private final ObjectMapper objectMapper;
+    Page<MovieDto> searchAdmin(MovieFilterDTO filter);
 
-    @Transactional
-    public MovieResponseDto createMovie(MovieRequestDto dto) {
-        Movie movie = objectMapper.convertValue(dto, Movie.class);
+    /**
+     * Tìm phim theo ID
+     */
+    MovieDto findById(Long id);
+    
+    /**
+     * Tìm phim theo slug
+     */
+    MovieDto findBySlug(String slug);
 
-        // Fetch related entities by ids
-        movie.setCasts(actorRepository.findAllById(dto.getCastIds()));
-        movie.setDirectors(directorRepository.findAllById(dto.getDirectorIds()));
-        movie.setGenres(genreRepository.findAllById(dto.getGenreIds()));
-//        movie.setCountry(countryRepository.findById(dto.getCountryId())
-//                .orElseThrow(() -> new RuntimeException("Country không tồn tại")));
+    MovieDto saveDraft(MovieRequest request);
 
-        movieRepository.save(movie);
+    MovieDto updateDraft(Long id, MovieRequest request);
 
-        // Convert back entity to dto (gán id tự động)
-        return objectMapper.convertValue(movie, MovieResponseDto.class);
-    }
+    /**
+     * Xóa phim
+     */
+    void delete(Long id);
+    
+    /**
+     * Thay đổi trạng thái phim
+     */
+    MovieDto updateStatus(Long id, MovieStatusEnum status);
 
-    @Transactional
-    public MovieResponseDto updateMovie(Long id, MovieRequestDto dto) {
-        if(id == null) {
-            throw new BadRequestException("Phim không tồn tại");
-        }
+    /**
+     * Tìm phim theo thể loại
+     */
+    Page<MovieDto> findByGenreId(Long genreId, Pageable pageable);
+    
+    /**
+     * Tìm phim theo quốc gia
+     */
+//    Page<MovieDto> findByCountryId(Long countryId, Pageable pageable);
+    
+    /**
+     * Tìm phim theo tag
+     */
+//    Page<MovieDto> findByTagId(Long tagId, Pageable pageable);
+    
+    /**
+     * Tìm phim đặc sắc
+     */
+    List<MovieDto> findFeatured(int limit);
+    
+    /**
+     * Tìm phim mới cập nhật
+     */
+    List<MovieDto> findLatest(int limit);
+    
+    /**
+     * Tìm phim có lượt xem cao nhất
+     */
+    List<MovieDto> findMostViewed(int limit);
+    
+    /**
+     * Tìm kiếm phim theo từ khóa
+     */
+    Page<MovieDto> search(String keyword, Pageable pageable);
 
-        try {
-            Movie movie = movieRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Phim không tồn tại"));
-
-            // Map DTO sang entity (cập nhật các trường, ngoại trừ id)
-            objectMapper.updateValue(movie, dto);
-
-            // Cập nhật các quan hệ ManyToMany & ManyToOne
-            movie.setCasts(actorRepository.findAllById(dto.getCastIds()));
-            movie.setDirectors(directorRepository.findAllById(dto.getDirectorIds()));
-            movie.setGenres(genreRepository.findAllById(dto.getGenreIds()));
-//            movie.setCountry(countryRepository.findById(dto.getCountryId())
-//                    .orElseThrow(() -> new RuntimeException("Country không tồn tại")));
-
-            movieRepository.save(movie);
-
-            return objectMapper.convertValue(movie, MovieResponseDto.class);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        }
-
-
-    }
-
-    @Transactional
-    public void deleteMovie(Long id) {
-        if (!movieRepository.existsById(id)) {
-            throw new RuntimeException("Phim không tồn tại");
-        }
-        movieRepository.deleteById(id);
-    }
-
-    public List<MovieResponseDto> getAllMovies() {
-        List<Movie> movies = movieRepository.findAll();
-        return movies.stream()
-                .map(movie -> objectMapper.convertValue(movie, MovieResponseDto.class))
-                .toList();
-    }
-
-    public MovieResponseDto getMovieById(Long id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Phim không tồn tại"));
-        return objectMapper.convertValue(movie, MovieResponseDto.class);
-    }
+    /**
+     * Find movies by type (phim lẻ, phim bộ)
+     */
+    Page<MovieDto> findByType(MovieTypeEnum type, Pageable pageable);
+    
+    /**
+     * Find movies by status (hoàn thành, đang cập nhật)
+     */
+    Page<MovieDto> findByStatus(MovieStatusEnum status, Pageable pageable);
 }

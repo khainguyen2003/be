@@ -1,6 +1,6 @@
 package com.datn.motchill.shared.dto;
 
-import com.datn.motchill.admin.common.utils.Constants;
+import com.datn.motchill.common.utils.Constants;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

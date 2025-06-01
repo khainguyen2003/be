@@ -1,19 +1,20 @@
 package com.datn.motchill.entity;
 
+import com.datn.motchill.enums.MovieStatusEnum;
+import com.datn.motchill.enums.MovieTypeEnum;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "MOVIE")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Movie extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // id tự tăng
-    private Long id;
 
     @Column(length = 255, nullable = false)
     private String name;
@@ -48,6 +49,12 @@ public class Movie extends BaseEntity {
     @Column(length = 100)
     private String language;
 
+    @Convert(converter = MovieStatusEnum.MovieStatusEnumConverter.class)
+    private MovieStatusEnum status;
+
+    @Convert(converter = MovieTypeEnum.MovieTypeEnumConverter.class)
+    private MovieTypeEnum movieType;
+
     @ManyToMany
     @JoinTable(
             name = "movie_cast",
@@ -74,9 +81,9 @@ public class Movie extends BaseEntity {
     )
     private List<Genre> genres = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "country_id")
-//    private Country country;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    private Country country;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Episode> episodes = new ArrayList<>();

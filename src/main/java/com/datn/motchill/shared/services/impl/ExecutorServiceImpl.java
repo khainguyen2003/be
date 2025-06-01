@@ -1,7 +1,7 @@
 package com.datn.motchill.shared.services.impl;
 
+import com.datn.motchill.common.utils.Constants;
 import com.datn.motchill.shared.annotation.ColumnMapping;
-import com.datn.motchill.admin.common.utils.Constants;
 import com.datn.motchill.shared.dto.ResponseProcedure;
 import com.datn.motchill.shared.enums.BaseEnum;
 import com.datn.motchill.shared.services.ExecutorService;

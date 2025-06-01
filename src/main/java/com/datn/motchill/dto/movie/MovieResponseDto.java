@@ -1,9 +1,9 @@
 package com.datn.motchill.dto.movie;
 
-import com.datn.motchill.dto.ActorDto;
-import com.datn.motchill.dto.CountryDto;
-import com.datn.motchill.dto.DirectorDto;
-import com.datn.motchill.dto.EpisodeDto;
+import com.datn.motchill.dto.actor.ActorDto;
+import com.datn.motchill.dto.country.CountryDto;
+import com.datn.motchill.dto.director.DirectorDto;
+import com.datn.motchill.dto.episode.EpisodeDto;
 import com.datn.motchill.dto.genre.GenreDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
